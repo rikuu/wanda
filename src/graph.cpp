@@ -32,7 +32,7 @@ std::string graph_t::label(const interval_t &node) const {
   uint8_t c = '\0';
   for (size_t i = 0; i < m_k; i++) {
     #ifdef DEBUG
-      std::cout << "[D::" << __func__ << "]: " << i << ", "
+      std::cerr << "[D::" << __func__ << "]: " << i << ", "
         "(" << interval.left << ", " << interval.right << "), " <<
         static_cast<char>(c) << std::endl;
     #endif
@@ -65,18 +65,12 @@ interval_t graph_t::follow_edge(const interval_t &node, const uint8_t c) const {
   // First find the inteval e corresponding to c1 .. ck+1
   const interval_t e = m_index.extend(node, c);
 
-  // std::cout << "n: " << node.left << ", " << node.right << std::endl;
-  // std::cout << "c: " << c << ", " << c1 << std::endl;
-  // std::cout << "c1: " << start_e << ", " << end_e << std::endl;
-
   if (m_first[e.left] && (e.right == m_index.size()+1 || m_first[e.right+1]))
     return interval_t(e.left, e.right);
 
   // Take interval inside it corresponding to c2 .. ck+1
   const size_t start = m_first[e.left] ? e.left : m_first_ss.select(m_first_rs.rank(e.left));
   const size_t end = (e.right == m_index.size()) ? e.right : m_first_ss.select(m_first_rs.rank(e.right) + 1) - 1;
-
-  // std::cout << "c2: " << start << ", " << end << std::endl;
 
   return interval_t(start, end);
 }
@@ -93,7 +87,6 @@ std::vector<interval_t> graph_t::incoming(const interval_t &node) const {
 }
 
 std::vector<interval_t> graph_t::outgoing(const interval_t &node) const {
-  // std::cout << std::endl;
   std::vector<interval_t> edges;
   for (size_t i = node.left; i <= node.right; i++) {
     const size_t ilf = m_index.inverse_lf(i);

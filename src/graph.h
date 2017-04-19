@@ -71,15 +71,15 @@ public:
     sdsl::load_from_file(first, base + ".first");
 
     #ifdef DEBUG
-      std::cout << "[D::" << __func__ << "]: ";
+      std::cerr << "[D::" << __func__ << "]: ";
       for (size_t i = 0; i < first.size(); i++)
-        std::cout << first[i];
-      std::cout << std::endl;
+        std::cerr << first[i];
+      std::cerr << std::endl;
 
-      std::cout << "[D::" << __func__ << "]: ";
+      std::cerr << "[D::" << __func__ << "]: ";
       for (size_t i = 0; i < first.size(); i++)
-        std::cout << i;
-      std::cout << std::endl;
+        std::cerr << i;
+      std::cerr << std::endl;
     #endif
 
     return graph_t(k, index, first);
@@ -131,6 +131,10 @@ public:
       occurrences.push_back(m_index.sa(j));
     }
     return occurrences;
+  }
+
+  inline size_t rank(const interval_t &node) const {
+    return m_first_rs.rank(node.left+1);
   }
 
 private:

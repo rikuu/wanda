@@ -27,15 +27,15 @@ public:
     sdsl::load_from_file(sa_samples, base + ".sa");
 
     #ifdef DEBUG
-      std::cout << "[D::" << __func__ << "]: ";
+      std::cerr << "[D::" << __func__ << "]: ";
       for (size_t i = 0; i < tree.size(); i++)
-        std::cout << tree[i];
-      std::cout << std::endl;
+        std::cerr << tree[i];
+      std::cerr << std::endl;
 
-      std::cout << "[D::" << __func__ << "]: ";
+      std::cerr << "[D::" << __func__ << "]: ";
       for (size_t i = 0; i < tree.size(); i++)
-        std::cout << i;
-      std::cout << std::endl;
+        std::cerr << i;
+      std::cerr << std::endl;
     #endif
 
     return index_t(tree, sa_samples);
