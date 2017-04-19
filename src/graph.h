@@ -9,6 +9,8 @@
 #include "index.h"
 #include "interval.h"
 
+#define MARKER '$'
+
 class graph_t {
 public:
   graph_t(const std::string &kernel_filename, const size_t k) :
@@ -68,9 +70,17 @@ public:
     sdsl::rrr_vector<127> first;
     sdsl::load_from_file(first, base + ".first");
 
-    for (size_t i = 0; i < first.size(); i++)
-      std::cout << first[i];
-    std::cout << std::endl;
+    #ifdef DEBUG
+      std::cout << "[D::" << __func__ << "]: ";
+      for (size_t i = 0; i < first.size(); i++)
+        std::cout << first[i];
+      std::cout << std::endl;
+
+      std::cout << "[D::" << __func__ << "]: ";
+      for (size_t i = 0; i < first.size(); i++)
+        std::cout << i;
+      std::cout << std::endl;
+    #endif
 
     return graph_t(k, index, first);
   }
@@ -98,14 +108,20 @@ public:
   std::vector<interval_t> outgoing(const interval_t &node) const;
 
   // The in-degree of a node
-  inline size_t indegree(const interval_t &node) const {
-    return incoming(node).size();
+  inline size_t outdegree(const interval_t &node) const {
+    return outgoing(node).size();
   }
 
   // The out-degree of a node
-  inline size_t outdegree(const interval_t &node) const {
-    if (node.left == node.right) return 1;
-    return m_index.interval_symbols(node.left, node.right).size();
+  inline size_t indegree(const interval_t &node) const {
+    const std::vector<uint8_t> symbols = m_index.interval_symbols(node.left, node.right);
+
+    size_t count = 0;
+    for (size_t i = 0; i < symbols.size(); i++) {
+      if (symbols[i] != 0 && symbols[i] != MARKER) count++;
+    }
+
+    return count;
   }
 
   // Returns all occurrences of a kmer in the text

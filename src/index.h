@@ -26,9 +26,17 @@ public:
     sdsl::load_from_file(tree, base + ".bwt");
     sdsl::load_from_file(sa_samples, base + ".sa");
 
-    for (size_t i = 0; i < tree.size(); i++)
-      std::cout << tree[i];
-    std::cout << std::endl;
+    #ifdef DEBUG
+      std::cout << "[D::" << __func__ << "]: ";
+      for (size_t i = 0; i < tree.size(); i++)
+        std::cout << tree[i];
+      std::cout << std::endl;
+
+      std::cout << "[D::" << __func__ << "]: ";
+      for (size_t i = 0; i < tree.size(); i++)
+        std::cout << i;
+      std::cout << std::endl;
+    #endif
 
     return index_t(tree, sa_samples);
   }
@@ -65,10 +73,6 @@ public:
     std::vector<uint64_t> ranks_j(m_tree.sigma);
 
     m_tree.interval_symbols(left, right + 1, extensions, alphabet, ranks_i, ranks_j);
-
-    // SDSL seems to add extra characters to alphabet
-    while (alphabet.size() > extensions)
-      alphabet.pop_back();
 
     return alphabet;
   }
@@ -110,6 +114,12 @@ public:
 
     if (m_c_array[c] == 0)
       return interval_t(0, 0);
+
+    #ifdef DEBUG
+      std::cout << "[D::" << __func__ << "]: " <<
+        "(" << interval.left << ", " << interval.right << "), " <<
+        static_cast<char>(c) << ", " << m_c_array[c] << std::endl;
+    #endif
 
     const size_t end = m_tree.select(interval.right - m_c_array[c] + 1, c);
 

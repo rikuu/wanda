@@ -40,7 +40,7 @@ static void stream_bwt(const std::string &input, const std::string &suffix,
     sa |= (static_cast<int64_t>(buffer[4])) << 32;
 
     // TODO: Not load to memory, but still random accesses?
-    bwt_stream << (in_buffer[sa == 0 ? n : sa - 1]);
+    bwt_stream << (in_buffer[sa == 0 ? n - 1 : sa - 1]);
 
     if ((i % SA_SAMPLE_DENSITY) == 0) {
       (*samples)[i / SA_SAMPLE_DENSITY] = sa;

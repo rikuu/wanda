@@ -15,10 +15,10 @@ void graph_t::build_first(const std::string &kernel_filename) {
   sdsl::lcp_wt<> lcp;
   sdsl::construct(lcp, kernel_filename.c_str(), 1);
 
-  sdsl::bit_vector first = sdsl::bit_vector(m_index.size() - 1, false);
-  for (size_t i = 0; i < m_index.size()-1; i++) {
-    if (lcp[i+2] < m_k) {
-      first[i] = true;
+  sdsl::bit_vector first = sdsl::bit_vector(m_index.size(), false);
+  for (size_t i = 1; i < lcp.size(); i++) {
+    if (lcp[i] < m_k) {
+      first[i-1] = true;
     }
   }
 
@@ -31,12 +31,16 @@ std::string graph_t::label(const interval_t &node) const {
   interval_t interval = node;
   uint8_t c = '\0';
   for (size_t i = 0; i < m_k; i++) {
-    std::cout << i << ", " << m_k << ", " << static_cast<char>(c) << ", " << interval.left << ", " << interval.right << std::endl;
+    #ifdef DEBUG
+      std::cout << "[D::" << __func__ << "]: " << i << ", "
+        "(" << interval.left << ", " << interval.right << "), " <<
+        static_cast<char>(c) << std::endl;
+    #endif
 
     interval = m_index.inverse_lf(interval, &c);
-    m_buffer[m_k - i - 1] = static_cast<char>(c);
+    m_buffer[i] = static_cast<char>(c);
 
-    if (c == '$') {
+    if (c == MARKER) {
       return "";
     }
   }
@@ -77,7 +81,7 @@ interval_t graph_t::follow_edge(const interval_t &node, const uint8_t c) const {
   return interval_t(start, end);
 }
 
-std::vector<interval_t> graph_t::outgoing(const interval_t &node) const {
+std::vector<interval_t> graph_t::incoming(const interval_t &node) const {
   const std::vector<uint8_t> edges = m_index.interval_symbols(node.left, node.right);
 
   std::vector<interval_t> nodes;
@@ -88,7 +92,7 @@ std::vector<interval_t> graph_t::outgoing(const interval_t &node) const {
   return nodes;
 }
 
-std::vector<interval_t> graph_t::incoming(const interval_t &node) const {
+std::vector<interval_t> graph_t::outgoing(const interval_t &node) const {
   // std::cout << std::endl;
   std::vector<interval_t> edges;
   for (size_t i = node.left; i <= node.right; i++) {
@@ -99,10 +103,6 @@ std::vector<interval_t> graph_t::incoming(const interval_t &node) const {
 
     const size_t left = m_first_ss.select(rank);
     const size_t right = m_first_ss.select(rank + 1) - 1;
-
-    // std::cout << i << ", " << index[i] << ", " << c_array[index[i]]
-    //   << ", "<< ilf << ", " << rank <<
-    //   ", " << left << ", " << right << std::endl;
 
     const interval_t n = interval_t(left, right);
     bool in = false;
