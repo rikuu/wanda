@@ -11,6 +11,8 @@
 
 #define MARKER '$'
 
+#define frequency(n) ((n.right - n.left) + 1)
+
 class graph_t {
 public:
   graph_t(const std::string &kernel_filename, const size_t k) :
@@ -102,26 +104,29 @@ public:
   std::string label(const interval_t &node) const;
 
   // Returns all the nodes which have an outgoing edge to a node
-  std::vector<interval_t> incoming(const interval_t &node) const;
+  std::vector<interval_t> incoming(const interval_t &node, const size_t solid) const;
 
   // Returns all the nodes which have an incoming edge from a node
-  std::vector<interval_t> outgoing(const interval_t &node) const;
+  std::vector<interval_t> outgoing(const interval_t &node, const size_t solid) const;
 
   // The in-degree of a node
-  inline size_t outdegree(const interval_t &node) const {
-    return outgoing(node).size();
+  inline size_t outdegree(const interval_t &node, const size_t solid) const {
+    return outgoing(node, solid).size();
   }
 
   // The out-degree of a node
-  inline size_t indegree(const interval_t &node) const {
-    const std::vector<uint8_t> symbols = m_index.interval_symbols(node.left, node.right);
-
-    size_t count = 0;
-    for (size_t i = 0; i < symbols.size(); i++) {
-      if (symbols[i] != 0 && symbols[i] != MARKER) count++;
-    }
-
-    return count;
+  inline size_t indegree(const interval_t &node, const size_t solid) const {
+    return incoming(node, solid).size();
+    // const std::vector<uint8_t> symbols = m_index.interval_symbols(node.left, node.right);
+    //
+    // size_t count = 0;
+    // for (size_t i = 0; i < symbols.size(); i++) {
+    //   if (symbols[i] != 0 && symbols[i] != MARKER) {
+    //     count++;
+    //   }
+    // }
+    //
+    // return count;
   }
 
   // Returns all occurrences of a kmer in the text

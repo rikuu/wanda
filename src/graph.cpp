@@ -54,7 +54,7 @@ std::vector<interval_t> graph_t::distinct_kmers(const size_t frequency) const {
     const size_t start = m_first_ss.select(i);
     const size_t end = m_first_ss.select(i + 1) - 1;
 
-    if ((end - start)+1 >= frequency) {
+    if ((end - start) + 1 >= frequency) {
       kmers.push_back(interval_t(start, end));
     }
   }
@@ -75,18 +75,28 @@ interval_t graph_t::follow_edge(const interval_t &node, const uint8_t c) const {
   return interval_t(start, end);
 }
 
-std::vector<interval_t> graph_t::incoming(const interval_t &node) const {
-  const std::vector<uint8_t> edges = m_index.interval_symbols(node.left, node.right);
+std::vector<interval_t> graph_t::incoming(const interval_t &node, const size_t solid) const {
+  const std::vector<uint8_t> symbols = m_index.interval_symbols(node.left, node.right);
 
   std::vector<interval_t> nodes;
-  for (size_t i = 0; i < edges.size(); i++) {
-    nodes.push_back(follow_edge(node, edges[i]));
+  for (size_t i = 0; i < symbols.size(); i++) {
+    if (symbols[i] != 0 && symbols[i] != MARKER) {
+      #ifdef DEBUG
+        std::cerr << "[D::" << __func__ << "]: " <<
+          "(" << node.left << ", " << node.right << "), " << symbols[i] << std::endl;
+      #endif
+
+      const interval_t neighbor = follow_edge(node, symbols[i]);
+      if (frequency(neighbor) >= solid) {
+        nodes.push_back(neighbor);
+      }
+    }
   }
 
   return nodes;
 }
 
-std::vector<interval_t> graph_t::outgoing(const interval_t &node) const {
+std::vector<interval_t> graph_t::outgoing(const interval_t &node, const size_t solid) const {
   std::vector<interval_t> edges;
   for (size_t i = node.left; i <= node.right; i++) {
     const size_t ilf = m_index.inverse_lf(i);
@@ -98,11 +108,13 @@ std::vector<interval_t> graph_t::outgoing(const interval_t &node) const {
     const size_t right = m_first_ss.select(rank + 1) - 1;
 
     const interval_t n = interval_t(left, right);
-    bool in = false;
-    for (size_t j = 0; j < edges.size(); j++) {
-      if (edges[j] == n) in = true;
+    if (frequency(n) >= solid) {
+      bool in = false;
+      for (size_t j = 0; j < edges.size(); j++) {
+        if (edges[j] == n) in = true;
+      }
+      if (!in) edges.push_back(n);
     }
-    if (!in) edges.push_back(n);
 
     // i += right - ilf + 1;
   }

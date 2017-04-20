@@ -7,8 +7,6 @@
 #include "interval.h"
 #include "graph.h"
 
-#define frequency(n) ((n.right - n.left) + 1)
-
 void print_path(const graph_t &graph, const std::vector<interval_t> &path) {
   // TODO: Print with a lock
 
@@ -37,12 +35,12 @@ void compute_unitigs(const graph_t &graph, const size_t solid, const size_t min_
     if (visited[rank]) continue;
     visited[rank] = true;
 
-    const std::vector<interval_t> incoming = graph.incoming(node);
+    const std::vector<interval_t> incoming = graph.incoming(node, solid);
 
     #ifdef DEBUG
       std::cerr << "[D::" << __func__ << "]: " <<
         "(" << node.left << ", " << node.right << "): " <<
-        incoming.size() << ", " << graph.indegree(node) << ", " << frequency(node) << std::endl;
+        incoming.size() << ", " << graph.outdegree(node, solid) << ", " << frequency(node) << std::endl;
 
       for (size_t j = 0; j < incoming.size(); j++) {
         std::cerr << "\t (" << incoming[j].left << ", " << incoming[j].right << ")" << std::endl;
@@ -50,12 +48,12 @@ void compute_unitigs(const graph_t &graph, const size_t solid, const size_t min_
       std::cerr << std::endl;
     #endif
 
-    if (incoming.size() == 1 && graph.outdegree(node) > 1) {
+    if (incoming.size() == 1 && graph.outdegree(node, solid) > 1) {
       std::vector<interval_t> path;
       path.push_back(node);
 
       interval_t n = incoming[0];
-      std::vector<interval_t> in = graph.incoming(n);
+      std::vector<interval_t> in = graph.incoming(n, solid);
       while (in.size() == 1 && frequency(n) >= solid) {
         // Visited nodes can be part of the unitig, but since we don't check
         // for outdegree, we can get into a cycle with the only one exiting
@@ -69,7 +67,7 @@ void compute_unitigs(const graph_t &graph, const size_t solid, const size_t min_
         // Add node to path and get next node
         path.push_back(n);
         n = in[0];
-        in = graph.incoming(n);
+        in = graph.incoming(n, solid);
       }
 
       // k + |v| - 1 = |path|
