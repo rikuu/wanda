@@ -25,7 +25,7 @@ void compute_unitigs(const graph_t &graph, const size_t solid) {
   const std::vector<interval_t> kmers = graph.distinct_kmers(solid);
   std::cerr << "[V::" << __func__ << "]: " << kmers.size() << std::endl;
 
-  sdsl::bit_vector visited = sdsl::bit_vector(kmers.size(), false);
+  sdsl::bit_vector visited = sdsl::bit_vector(graph.rank(kmers.back()) + 1, false);
 
   size_t unitig_count = 0;
   for (size_t i = 0; i < kmers.size(); i++) {
@@ -63,6 +63,7 @@ void compute_unitigs(const graph_t &graph, const size_t solid) {
         out = graph.outgoing(n);
       }
 
+      std::cout << ">contig" << unitig_count << std::endl;
       print_path(graph, path);
       unitig_count++;
     }

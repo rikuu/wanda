@@ -54,7 +54,7 @@ std::vector<interval_t> graph_t::distinct_kmers(const size_t frequency) const {
     const size_t start = m_first_ss.select(i);
     const size_t end = m_first_ss.select(i + 1) - 1;
 
-    if (end - start >= frequency) {
+    if ((end - start)+1 >= frequency) {
       kmers.push_back(interval_t(start, end));
     }
   }
