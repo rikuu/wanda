@@ -134,7 +134,11 @@ public:
   }
 
   inline size_t rank(const interval_t &node) const {
-    return m_first_rs.rank(node.left + 1);
+    return m_first_rs.rank(node.left);
+  }
+
+  inline size_t k() const {
+    return m_k;
   }
 
 private:

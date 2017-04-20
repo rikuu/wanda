@@ -21,9 +21,9 @@ void print_path(const graph_t &graph, const std::vector<interval_t> &path) {
   std::cout << unitig << std::endl;
 }
 
-void compute_unitigs(const graph_t &graph, const size_t solid) {
+void compute_unitigs(const graph_t &graph, const size_t solid, const size_t min_length) {
   const std::vector<interval_t> kmers = graph.distinct_kmers(solid);
-  std::cerr << "[V::" << __func__ << "]: " << kmers.size() << std::endl;
+  std::cerr << "[V::" << __func__ << "]: " << kmers.size() << " nodes" << std::endl;
 
   sdsl::bit_vector visited = sdsl::bit_vector(graph.rank(kmers.back()) + 1, false);
 
@@ -63,30 +63,33 @@ void compute_unitigs(const graph_t &graph, const size_t solid) {
         out = graph.outgoing(n);
       }
 
-      std::cout << ">contig" << unitig_count << std::endl;
-      print_path(graph, path);
-      unitig_count++;
+      if ((graph.k() + path.size() - 1) >= min_length) {
+        std::cout << ">contig" << unitig_count << std::endl;
+        print_path(graph, path);
+        unitig_count++;
+      }
     }
   }
 
-  std::cerr << "[V::" << __func__ << "]: " << unitig_count << std::endl;
+  std::cerr << "[V::" << __func__ << "]: " << unitig_count << " unitigs" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 4) {
-    std::cerr << "Usage: " << argv[0] << " <graph prefix> <k> <s>" << std::endl;
+  if (argc != 5) {
+    std::cerr << "Usage: " << argv[0] << " <graph prefix> <k> <s> <min length>" << std::endl;
     return 1;
   }
 
   const std::string prefix = argv[1];
   const size_t k = std::stoi(argv[2]);
   const size_t solid = std::stoi(argv[3]);
+  const size_t min_length = std::stoi(argv[4]);
 
   // Load graph
   const graph_t graph = graph_t::load(prefix, k);
 
   // Compute unitigs
-  compute_unitigs(graph, solid);
+  compute_unitigs(graph, solid, min_length);
 
   return 0;
 }
