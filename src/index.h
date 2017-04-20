@@ -74,6 +74,9 @@ public:
 
     m_tree.interval_symbols(left, right + 1, extensions, alphabet, ranks_i, ranks_j);
 
+    while (alphabet.size() > extensions)
+      alphabet.pop_back();
+
     return alphabet;
   }
 
@@ -129,15 +132,7 @@ public:
 
 private:
   void build_c_array() {
-    sdsl::int_vector_size_type nExtensions;
-    std::vector<uint8_t> alphabet(m_tree.sigma);
-    std::vector<uint64_t> ranks_i(m_tree.sigma);
-    std::vector<uint64_t> ranks_j(m_tree.sigma);
-
-    m_tree.interval_symbols(0, m_tree.size(), nExtensions, alphabet, ranks_i, ranks_j);
-
-    while (alphabet.size() > nExtensions)
-      alphabet.pop_back();
+    std::vector<uint8_t> alphabet = this->interval_symbols(0, m_tree.size()-1);
     std::sort(alphabet.begin(), alphabet.end());
     assert(alphabet.size() != 0);
 
