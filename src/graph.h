@@ -98,24 +98,24 @@ public:
   }
 
   // All distinct nodes with a minimum frequency
-  std::vector<interval_t> distinct_kmers(const size_t frequency) const;
+  std::vector<interval_t> distinct_kmers(const size_t solid = 0) const;
 
   // Returns the label of a node (i.e. the "content" of the corresponding kmer)
   std::string label(const interval_t &node) const;
 
   // Returns all the nodes which have an outgoing edge to a node
-  std::vector<interval_t> incoming(const interval_t &node, const size_t solid) const;
+  std::vector<interval_t> incoming(const interval_t &node, const size_t solid = 0) const;
 
   // Returns all the nodes which have an incoming edge from a node
-  std::vector<interval_t> outgoing(const interval_t &node, const size_t solid) const;
+  std::vector<interval_t> outgoing(const interval_t &node, const size_t solid = 0) const;
 
   // The in-degree of a node
-  inline size_t outdegree(const interval_t &node, const size_t solid) const {
+  inline size_t outdegree(const interval_t &node, const size_t solid = 0) const {
     return outgoing(node, solid).size();
   }
 
   // The out-degree of a node
-  inline size_t indegree(const interval_t &node, const size_t solid) const {
+  inline size_t indegree(const interval_t &node, const size_t solid = 0) const {
     return incoming(node, solid).size();
     // const std::vector<uint8_t> symbols = m_index.interval_symbols(node.left, node.right);
     //

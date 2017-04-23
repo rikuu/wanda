@@ -18,8 +18,21 @@ void next_line(FILE *in, char *buffer) {
   }
 }
 
+void rev_comp(char *buffer, char *tmp) {
+  const size_t len = strlen(buffer);
+  for (size_t i = 0; i < len; i++) {
+    switch (buffer[len - 1 - i]) {
+      case 'A': tmp[i] = 'T'; break;
+      case 'T': tmp[i] = 'A'; break;
+      case 'G': tmp[i] = 'C'; break;
+      case 'C': tmp[i] = 'G'; break;
+    }
+  }
+  memcpy(buffer, tmp, len);
+}
+
 // Concatenates FASTA files into a stream-like format
-size_t concatenate(const char *filename, const bool type, FILE *out) {
+size_t concatenate(const char *filename, const bool type, FILE *out, const bool reverse) {
   // TODO: Support gzipped files with zlib deflate
   FILE *in = fopen(filename, "r");
   if (in == NULL) {
@@ -28,6 +41,7 @@ size_t concatenate(const char *filename, const bool type, FILE *out) {
   }
 
   char *buffer = new char[BUFFER_SIZE];
+  char *tmp = new char[BUFFER_SIZE];
 
   size_t length = 0;
   while (fgets(buffer, BUFFER_SIZE, in)) {
@@ -50,6 +64,10 @@ size_t concatenate(const char *filename, const bool type, FILE *out) {
       buffer_len = strlen(buffer);
       if (buffer[buffer_len-1] == '\n') {
         buffer[buffer_len-1] = '\0';
+      }
+
+      if (reverse) {
+        rev_comp(buffer, tmp);
       }
 
       fputs(buffer, out);
@@ -75,6 +93,10 @@ size_t concatenate(const char *filename, const bool type, FILE *out) {
           buffer[buffer_len-1] = '\0';
         }
 
+        if (reverse) {
+          rev_comp(buffer, tmp);
+        }
+
         fputs(buffer, out);
         length += buffer_len;
       }
@@ -91,19 +113,26 @@ size_t concatenate(const char *filename, const bool type, FILE *out) {
 }
 
 int main(int argc, char **argv) {
-  // TODO: Optional read reversing
   if (argc < 3) {
-    std::cout << "Usage: " << argv[0] << " <out> <file1> [file2] ..." << std::endl;
+    std::cout << "Usage: " << argv[0] << " <out> <file1[,<01>]> [file2] ..." << std::endl;
     return 1;
   }
 
   // std::vector<size_t> colors = { 0 };
   FILE *out = fopen(argv[1], "w");
   for (int i = 2; i < argc; i++) {
-    const size_t name_length = strlen(argv[i]);
+    size_t name_length = strlen(argv[i]);
+
+    bool reverse = false;
+    if (argv[i][name_length-2] == ',') {
+      reverse = (argv[i][name_length-1] == '1');
+      name_length -= 2;
+      argv[i][name_length] = '\0';
+    }
+
     bool fastq = strcmp(argv[i] + (name_length - 2), "fq") == 0;
 
-    const size_t length = concatenate(argv[i], fastq, out);
+    const size_t length = concatenate(argv[i], fastq, out, reverse);
     // colors.push_back(colors.back() + length);
   }
 

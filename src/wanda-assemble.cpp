@@ -39,8 +39,8 @@ void compute_unitigs(const graph_t &graph, const size_t solid, const size_t min_
 
     #ifdef DEBUG
       std::cerr << "[D::" << __func__ << "]: " <<
-        "(" << node.left << ", " << node.right << "): " <<
-        incoming.size() << ", " << graph.outdegree(node, solid) << ", " << frequency(node) << std::endl;
+        "(" << node.left << ", " << node.right << ") = (" << graph.label(node) << "): " <<
+        "in: " << incoming.size() << ", out: " << graph.outdegree(node, solid) << ", f: " << frequency(node) << std::endl;
 
       for (size_t j = 0; j < incoming.size(); j++) {
         std::cerr << "\t (" << incoming[j].left << ", " << incoming[j].right << ")" << std::endl;
@@ -48,18 +48,16 @@ void compute_unitigs(const graph_t &graph, const size_t solid, const size_t min_
       std::cerr << std::endl;
     #endif
 
+    // Maximal unitigs start from nodes with outdegree > 1
     if (incoming.size() == 1 && graph.outdegree(node, solid) > 1) {
       std::vector<interval_t> path;
       path.push_back(node);
 
+      // Traverse graph backwards until a non-unary node or the starting node
+      // is reached
       interval_t n = incoming[0];
       std::vector<interval_t> in = graph.incoming(n, solid);
-      while (in.size() == 1 && frequency(n) >= solid) {
-        // Visited nodes can be part of the unitig, but since we don't check
-        // for outdegree, we can get into a cycle with the only one exiting
-        // node being the one we started from.
-        if (n == node) break;
-
+      while (in.size() == 1 && n != node) {
         // Mark all visited nodes
         const size_t r = graph.rank(n);
         visited[r] = true;
