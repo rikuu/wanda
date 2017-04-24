@@ -19,7 +19,7 @@ public:
       m_k(k), m_index(index_t(kernel_filename)) {
     m_buffer = new char[k];
 
-    build_first(kernel_filename);
+    m_first = build_first(kernel_filename, k);
     m_first_ss = sdsl::select_support_rrr<1, 127>(&m_first);
     m_first_rs = sdsl::rank_support_rrr<1, 127>(&m_first);
   }
@@ -42,7 +42,9 @@ public:
   graph_t(graph_t&& graph) noexcept :
       m_k(graph.m_k), m_index(graph.m_index), m_first(graph.m_first) {
     m_buffer = new char[m_k];
+
     // Invalidate other graph here
+    // sdsl::util::clear(graph.m_first);
   }
 
   // Copy assignment operator
@@ -57,7 +59,9 @@ public:
     m_k = graph.m_k;
     m_index = graph.m_index;
     m_first = graph.m_first;
+
     // Invalidate other graph here
+
     return *this;
   }
 
@@ -66,21 +70,26 @@ public:
   }
 
   // Loads a graph from a file
-  static graph_t load(const std::string &base, size_t k) {
+  static graph_t load(const std::string &base) {
     index_t index = index_t::load(base);
 
+    size_t k;
     sdsl::rrr_vector<127> first;
-    sdsl::load_from_file(first, base + ".first");
+
+    std::ifstream in(base + ".first");
+    if (in.good()) {
+      in.read(reinterpret_cast<char*>(&k), sizeof(k));
+      first.load(in);
+    } else {
+      std::cerr << "[E::" << __func__ << "]: Unable to read \"" << base + ".first\"!" << std::endl;
+      exit(1);
+    }
 
     #ifdef DEBUG
-      std::cerr << "[D::" << __func__ << "]: ";
+      std::cerr << "[D::" << __func__ << "]: k = " << k << std::endl;
+      std::cerr << "[D::" << __func__ << "]: first = ";
       for (size_t i = 0; i < first.size(); i++)
         std::cerr << first[i];
-      std::cerr << std::endl;
-
-      std::cerr << "[D::" << __func__ << "]: ";
-      for (size_t i = 0; i < first.size(); i++)
-        std::cerr << i;
       std::cerr << std::endl;
     #endif
 
@@ -90,7 +99,30 @@ public:
   // Stores the graph to a file
   void store_to_file(const std::string &base) const {
     m_index.store_to_file(base);
-    sdsl::store_to_file(m_first, base + ".first");
+
+    std::ofstream out(base + ".first");
+    if (out.good()) {
+      out.write(reinterpret_cast<const char*>(&m_k), sizeof(m_k));
+      m_first.serialize(out);
+    } else {
+      std::cerr << "[E::" << __func__ << "]: Unable to write to \"" << base + ".first\"!" << std::endl;
+    }
+  }
+
+  void change_k(const size_t k) {
+    if (k == m_k) {
+      return;
+    }
+
+    std::cerr << "[E::" << __func__ << "]: Not yet implemented!" << std::endl;
+    exit(1);
+
+    m_k = k;
+
+    // TODO: Implement build_first() without text
+    m_first = build_first("", k);
+    m_first_ss = sdsl::select_support_rrr<1, 127>(&m_first);
+    m_first_rs = sdsl::rank_support_rrr<1, 127>(&m_first);
   }
 
   inline size_t size() const {
@@ -150,7 +182,7 @@ private:
   // Follows an edge in the graph from a node to a node
   interval_t follow_edge(const interval_t &node, uint8_t c) const;
 
-  void build_first(const std::string &kernel_filename);
+  static sdsl::rrr_vector<127> build_first(const std::string &filename, const size_t k);
 
 private:
   size_t m_k;

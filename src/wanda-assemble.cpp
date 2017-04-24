@@ -81,18 +81,17 @@ void compute_unitigs(const graph_t &graph, const size_t solid, const size_t min_
 }
 
 int main(int argc, char* argv[]) {
-  if (argc != 5) {
-    std::cerr << "Usage: " << argv[0] << " <graph prefix> <k> <s> <min length>" << std::endl;
+  if (argc != 4) {
+    std::cerr << "Usage: " << argv[0] << " <graph prefix> <s> <min length>" << std::endl;
     return 1;
   }
 
   const std::string prefix = argv[1];
-  const size_t k = std::stoi(argv[2]);
-  const size_t solid = std::stoi(argv[3]);
-  const size_t min_length = std::stoi(argv[4]);
+  const size_t solid = std::stoi(argv[2]);
+  const size_t min_length = std::stoi(argv[3]);
 
   // Load graph
-  const graph_t graph = graph_t::load(prefix, k);
+  const graph_t graph = graph_t::load(prefix);
 
   // Compute unitigs
   compute_unitigs(graph, solid, min_length);

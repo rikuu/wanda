@@ -9,22 +9,24 @@
 #include "interval.h"
 #include "graph.h"
 
-// TODO: Use a more space efficient construction based on FM-index
-// TODO: Possible to remove "false-positive" nodes/edges, i.e. containing '$'?
-void graph_t::build_first(const std::string &kernel_filename) {
+// TODO: Use a more efficient construction based on FM-index
+sdsl::rrr_vector<127> graph_t::build_first(const std::string &filename, const size_t k) {
   sdsl::lcp_wt<> lcp;
-  sdsl::construct(lcp, kernel_filename.c_str(), 1);
+  sdsl::construct(lcp, filename.c_str(), 1);
 
-  sdsl::bit_vector first = sdsl::bit_vector(m_index.size(), false);
+  sdsl::bit_vector first = sdsl::bit_vector(lcp.size(), false);
   for (size_t i = 1; i < lcp.size(); i++) {
-    if (lcp[i] < m_k) {
+    if (lcp[i] < k) {
       first[i-1] = true;
     }
   }
 
   sdsl::util::clear(lcp);
 
-  m_first = sdsl::rrr_vector<127>(first);
+  sdsl::rrr_vector<127> rrr(first);
+  sdsl::util::clear(first);
+
+  return rrr;
 }
 
 std::string graph_t::label(const interval_t &node) const {
