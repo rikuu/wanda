@@ -1,3 +1,4 @@
+// Copyright 2017 Riku Walve
 
 #include <vector>
 #include <string>
@@ -98,6 +99,7 @@ interval_t graph_t::follow_edge(const interval_t &node, const uint8_t c) const {
 //   return nodes;
 // }
 
+// TODO: These two implementations are super dumb and ineffiecient, but accurate
 std::vector<interval_t> graph_t::incoming(const interval_t &node, const size_t solid) const {
   std::vector<interval_t> edges;
   for (size_t i = node.left; i <= node.right; i++) {

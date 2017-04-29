@@ -1,2 +1,6 @@
+.DS_Store
+
+ext/sdsl-inst
+
 *.dSYM
 src/*.o

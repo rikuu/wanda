@@ -1,5 +1,7 @@
-#ifndef GRAPH_H_
-#define GRAPH_H_
+// Copyright 2017 Riku Walve
+
+#ifndef WANDA_GRAPH_H_
+#define WANDA_GRAPH_H_
 
 #include <vector>
 #include <string>

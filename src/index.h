@@ -1,5 +1,7 @@
-#ifndef m_tree_H_
-#define m_tree_H_
+// Copyright 2017 Riku Walve
+
+#ifndef WANDA_INDEX_H_
+#define WANDA_INDEX_H_
 
 #include <vector>
 

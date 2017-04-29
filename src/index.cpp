@@ -1,3 +1,5 @@
+// Copyright 2017 Riku Walve
+
 #include <vector>
 
 #include <sdsl/bit_vectors.hpp>

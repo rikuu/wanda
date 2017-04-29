@@ -1,5 +1,7 @@
-#ifndef INTERVAL_H_
-#define INTERVAL_H_
+// Copyright 2017 Riku Walve
+
+#ifndef WANDA_INTERVAL_H_
+#define WANDA_INTERVAL_H_
 
 class interval_t {
  public:
